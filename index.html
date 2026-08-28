@@ -2,6 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<script>
+// Sentry (rastreamento de erro em produção) — INERTE até SENTRY_LOADER_SRC
+// ser preenchido (nenhuma requisição de rede acontece com a string vazia).
+var SENTRY_LOADER_SRC = 'https://js.sentry-cdn.com/2925c8059101d0b2169e9e9b5cd1da69.min.js';
+if (SENTRY_LOADER_SRC) {
+  var _sentryScript = document.createElement('script');
+  _sentryScript.src = SENTRY_LOADER_SRC;
+  _sentryScript.crossOrigin = 'anonymous';
+  document.head.appendChild(_sentryScript);
+}
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=5.0,user-scalable=yes,viewport-fit=cover">
 <meta name="description" content="P1 DIGITAL COE — Sistema de Gestão do Efetivo do Comando de Operações Especiais / PMERJ">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1493,7 +1504,7 @@ function _aplicarSnapshot(data){
 // busca o HTML publicado (bypassando cache HTTP), compara o build embutido,
 // e força reload com cache-bust só quando há diferença real. Resolve o mesmo
 // problema prático (usuário preso numa versão antiga) sem o risco de um SW.
-var APP_BUILD = 'v5.8.6';
+var APP_BUILD = 'v5.8.7';
 var UpdateChecker = {
   status: 'idle', // idle | checking | available | updating | error
   buildDisponivel: null,
@@ -1678,6 +1689,15 @@ function _initFirebase(){
   try {
     if(typeof firebase === 'undefined') throw new Error('SDK ausente');
     if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+
+    // Firebase App Check — INERTE até APP_CHECK_SITE_KEY ser preenchida.
+    // Pegar em Firebase Console > App Check > Apps > Web > reCAPTCHA v3.
+    var APP_CHECK_SITE_KEY = '';
+    if (APP_CHECK_SITE_KEY && firebase.appCheck) {
+      try { firebase.appCheck().activate(APP_CHECK_SITE_KEY, true); }
+      catch(e) { console.warn('App Check não pôde ativar:', e); }
+    }
+
     _fbDB  = firebase.database();
     _fbRef = _fbDB.ref('/p1digital');
     // Ponte somente-leitura com o SPAEI DIGITAL: NUNCA escreve em /spaei.
@@ -1722,7 +1742,9 @@ function _initFirebase(){
   _syncPill('syncing', '↑ CONECTANDO');
   loadScript(BASE + 'firebase-app-compat.js', function(){
     loadScript(BASE + 'firebase-database-compat.js', function(){
-      _initFirebase();
+      loadScript(BASE + 'firebase-app-check-compat.js', function(){
+        _initFirebase();
+      });
     });
   });
 })();
