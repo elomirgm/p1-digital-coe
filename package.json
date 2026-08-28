@@ -1,0 +1,12 @@
+{
+  "name": "p1-digital-coe-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Suite de regressão do P1 DIGITAL COE — roda contra o index.html real via jsdom + mock do Firebase RTDB. Não faz parte do app publicado.",
+  "scripts": {
+    "test": "node tests/regressao.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

@@ -1,0 +1,26 @@
+name: Testes de Regressão
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  regressao:
+    name: Suite de regressão (app real + mock RTDB)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar dependências (jsdom)
+        run: npm install
+
+      - name: Rodar suite de regressão
+        run: npm test
